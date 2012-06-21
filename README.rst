@@ -92,6 +92,16 @@ Use the API
 The format for training corpus
 --------------------------------
 
+Authors
+---------
+
+- Mingli Yuan (mountain at github)
+- Rui Wang
+
 License
 ---------
+
+- MIT license for the main part of the project
+- wapiti is under its own license
+- uthash is under BSD license
 
