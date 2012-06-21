@@ -43,7 +43,7 @@ CRF algorithm
 ---------------
 
 Conditional random fields
-from http://en.wikipedia.org/wiki/Conditional_random_field
+( from http://en.wikipedia.org/wiki/Conditional_random_field )
 
   Conditional random fields (CRFs) are a class of statistical modelling method
   often applied in pattern recognition and machine learning, where they are used
@@ -53,7 +53,7 @@ from http://en.wikipedia.org/wiki/Conditional_random_field
   processing predicts sequences of labels for sequences of input samples.
 
 We use wapiti package from LIMSI-CNRS, it is a very neat CRF package
-http://wapiti.limsi.fr/
+( http://wapiti.limsi.fr/ )
 
 We changed wapiti package a little by our requirements.
 
@@ -106,9 +106,32 @@ the segmentation, and finally destroy the program.
 
   gkseg.destory()
 
+The training process
+-------------------------------
 
-The format for training corpus
---------------------------------
+Step 1: prepare the training input
+
+- gksegt add <basedir> <aspect> <trainfile>
+
+Here we have
+
+- <basedir>: The base path of the training corpus
+- <aspect>: A specified aspect of the training corpus, see below corpus section
+- <trainfile>: The target training file
+
+Step 2: training the input file to get the model
+
+- gksegt train <trainfile> <modelfile>
+
+Here we have
+
+- <trainfile>: The training file as input
+- <modelfile>: The model file as output
+
+The format of training corpus
+-------------------------------
+
+
 
 Contributors
 --------------
