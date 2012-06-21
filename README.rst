@@ -57,8 +57,8 @@ We use wapiti package from LIMSI-CNRS, it is a very neat CRF package
 
 We changed wapiti package a little by our requirements.
 
-Install
----------
+Installation
+--------------
 
 Please follow below steps:
 
