@@ -5,6 +5,8 @@ GkSeg: yet another Chinese word segmentation package
 GkSeg is a Chinese word segmentation package shipped by Guokr.com.
 It is based on character-based tagging heuristics and CRF algorithm.
 
+Right now it only support Linux platform.
+
 Features
 ----------
 
