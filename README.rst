@@ -92,11 +92,11 @@ Use the API
 The format for training corpus
 --------------------------------
 
-Authors
----------
+Contributors
+--------------
 
 - Mingli Yuan (mountain at github)
-- Rui Wang
+- Rui Wang (isnowfy at github)
 
 License
 ---------
