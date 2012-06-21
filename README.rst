@@ -22,6 +22,7 @@ Character-based tagging heuristics is invented by N. Xue and others, and
 published at SIGHAN 2002 [Xue et al., 2002]
 
 The basic idea is to mark each character in a sentence with its kind:
+
 - b: begining character of a word
 - m: middle character of a word
 - e: end character of a word
@@ -60,7 +61,9 @@ Install
 Please follow below steps:
 
   git clone git://github.com/guokr/gkseg.git gkseg
+
   cd gkseg/wapiti
+
   make
 
 Now it is ready, you can use the tools provided by this package directly.
