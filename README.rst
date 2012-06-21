@@ -95,10 +95,15 @@ Before using the API, you should intialize the program first, and then perform
 the segmentation, and finally destroy the program.
 
   import gkseg
+
   text = '话说天下大势，分久必合，合久必分'.decode('utf-8')
+
   gkseg.init()
+
   print gkseg.seg(text) #segment the sentence into a list of words
+
   print gkseg.term(text) #extract the important words from the sentence
+
   gkseg.destory()
 
 
