@@ -71,12 +71,15 @@ Usage for the tools
 All the tools located under the bin directory
 
 gkseg: segment a text into words
+
 - gkseg <text>
 
 gksegd: start a webserver to segment words by restful api
+
 - gksegd
 
 gksegt: trainning the tool
+
 - gksegt add <basedir> <aspect> <trainfile>
 - gksegt train <trainfile> <modelfile>
 
