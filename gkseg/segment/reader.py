@@ -3,8 +3,8 @@
 
 import re
 
-import gkseg.seg.corrector as corrector
-from gkseg.seg.handler import Handler
+import gkseg.segment.corrector as corrector
+from gkseg.segment.handler import Handler
 
 patnl = re.compile(r'\n')
 patsp = re.compile(r'\s+')

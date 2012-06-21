@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from gkseg.seg.crf import seg as crfseg
-from gkseg.seg.crf import init as crfinit
-from gkseg.seg.crf import destroy as crfdestroy
+from gkseg.segment.crf import seg as crfseg
+from gkseg.segment.crf import init as crfinit
+from gkseg.segment.crf import destroy as crfdestroy
 
 def init(model):
     crfinit(model)

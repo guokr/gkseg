@@ -9,7 +9,7 @@ import os
 import os.path as path
 import threading
 
-import gkseg.seg.reader as reader
+import gkseg.segment.reader as reader
 
 wapiti = path.join('wapiti', 'libwapiti.so')
 cdll.LoadLibrary(wapiti)
