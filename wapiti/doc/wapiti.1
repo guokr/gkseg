@@ -1,0 +1,277 @@
+.TH wapiti 1
+.SH NAME
+wapiti
+.SH SYNOPSIS
+.B wapiti
+.RB mode\ [options]\ [input]\ [output]
+.SH DESCRIPTION
+.SS Overview
+Wapiti is a program for training and using discriminative sequence labelling models with various algorithms using an elastic penalty.
+It currently implement maxent models, maximum entropy Markov models (MEMM) and linear-chain conditional random fields (CRF) models
+.P
+It can work in different mode depending on the first argument you give to it, either training a model, labeling new data, or dumping a model in readable form.
+.P
+The mode switch can be either "train", "label", or "dump". (only a prefix long enough to differentiate them is really needed)
+.SS Options
+.TP
+.B \-h | \-\-help
+Output a short help message.
+.TP
+.B \-\-version
+Output version and revision numbers.
+
+.SS Train mode
+.TP
+.B \-\-me
+Activate the pure maxent mode, see below for more details.
+.TP
+.B \-T | \-\-type <string>
+Select the type of model to train. Can be either "maxent", "memm", or "crf", or "list" to get a list of supported models types. By default "crf" models are used.
+.TP
+.B \-a | \-\-algo <string>
+Select the algorithm used to train the model, specify "list" for a list of available algorithms. The first algorithm in this list is used as default.
+.TP
+.B \-p | \-\-pattern <file>
+Specify the file containing the patterns for extracting features. The format of the pattern file is detailed below.
+.TP
+.B \-m | \-\-model <file>
+Specify a model file to load and to train again. This allow you either to continue an interrupted training or to use an old model as a starting point for a new training. Beware that no new labels can be inserted in the model. As the training parameters are not saved in the model file, you have to specify them again, or specify new one if, for example, you want to continue training with another algorithm or a different penalty.
+.TP
+.B \-d | \-\-devel <file>
+Specify the data file to load as a development set. At the end of each iterations the error rate is computed on this dataset and displayed in the progress line. If enabled, this values is used to check convergence and stop training. If none are specified, the training set is used instead but beware that this is bad practice to use the training set to choose the stopping criterion.
+.TP
+.B \-c | \-\-compact
+Enable model compaction at the end of the training. This will remove all inactive observations from the model, leading to a much smaller model when an l1-penalty is used. See the note below for more details.
+.TP
+.B \-t | \-\-nthread <integer>
+Set the number of thread to use, this can drastically improve performance but is very algorithm dependent. Best value is to set it to the number of core you have. Default is 1.
+.TP
+.B \-j | \-\-jobsize <integer>
+Set the size of the job a thread will get each time it have nothing more to do. This is the number of sequences to proceed and default to 64. Increasing it will reduce communication overhead but can lead to a bad ballancing between threads, reducing it increase the communication overhead but can ballance work better between threads in case of small datasets.
+.B \-s | \-\-sparse
+Enable the computation of the forward/backward in sparse mode.
+.TP
+.B \-i | \-\-maxiter <integer>
+Defines the maximum number of iterations done by the training algorithm. A value of 0 means unlimited and training will continue until another stopping criterion is reached. The default is unlimited and algorithm will stop using the others criteria.
+.TP
+.B \-1 | \-\-rho1 <float>
+Defines the L1-component of the elastic-net penalty. Increasing this value lead to smaller models and can improve training time but will probably lead to reduced performances. Setting this value to 0 result in a classical L2-penalty only. If algorithm can optimize the L1-penalty, the default value is 0.5, else the default is 0.
+.TP
+.B \-2 | \-\-rho2 <float>
+Specifies the L2-component of the elastic-net penalty. Setting this value to 0 lead to a simple L1 regularization. While allowed, this is discouraged as it can lead to numerical instability. The default value is 0.00001.
+.TP
+.B \-o | \-\-objwin <integer>
+Set the window size for the objective value stopping criterion, see below for more details. Default value is 5.
+.TP
+.B \-w | \-\-stopwin <integer>
+Set the window size for the devel stopping criterion, see below for more details. Default value is 5.
+.TP
+.B \-e | \-\-stopeps <float>
+Set the size of the interval for stopping criterion, see below for more details. Default value is 0.02%.
+.TP
+.B \-\-clip
+Enables gradient clipping for the L-BFGS. This will set to 0 the gradient component whose corresponding features values are 0, preventing the trainer to move the feature away from 0. This is useful if you have a sparse model and want to refine it with an l2-only regularization without loosing the sparsity.
+.TP
+.B \-\-histsz <integer>
+Specifies the size of the history to keep in L-BFGS to approximate the inverse of the diagonal of the Hessian. Increasing this value lead to better approximation, so generally less iterations but increase memory usage. The default is 5.
+.TP
+.B \-\-maxls <integer>
+Set the maximum number of linesearch step in L-BFGS to perform before giving up.
+.TP
+.B \-\-eta0 <float>
+Set the learning rate for SGD trainer.
+.TP
+.B \-\-alpha <float>
+Set the alpha value of the exponential decay in SGD trainer.
+.TP
+.B \-\-kappa <float>
+Set the kappa parameter for BCD trainer. Default is 1.5, increasing this value make the algorithm more stable but also slower. Try to increase it if you have numerical instability.
+.TP
+.B \-\-stpmin <float>
+.B \-\-stpmax <float>
+Set the minimum/maximum step size allowed for the RPROP trainer. Defaults are 1e-8 and 50.0, thoses seems to be good value to get numerical stability with double computations.
+.TP
+.B \-\-stpinc <float>
+.B \-\-stpdec <float>
+Set the increment/decrement factor used to update the steps in the RPROP trainer. Defaults values are 1.2 and 0.5. Increment must be greater than 1.0 and decrement must be between 0 and 1.0.
+.TP
+.B \-\-cutoff
+Select the alternate projection scheme for RPROP with l1-regularization, this can lead to better model depending on your task.
+
+.SS Label mode
+.TP
+.B \-\-me
+Activate the pure maxent mode, see below for more details.
+.TP
+.B \-m | \-\-model <file>
+Specifies a model file to load and to use for labeling. This switch is mandatory.
+.TP
+.B \-l | \-\-label
+With this switch, Wapiti will only output the predicted labels. Without, it output the full data with an additional column containing the predicted labels.
+.TP
+.B \-c | \-\-check
+Assume the data to be labeled are already labeled so during the labeling process we can check our own result displaying the error rates. This doesn't affect the labeling process and output data will remain exactly the same. However, progress will be more verbose and informative: at the end of the process, for each labels, the precision, recall, and f-measure will be displayed. If you ask for N-best output, statistics are computed only on the best sequence.
+.TP
+.B \-s | \-\-score
+Output a line with score before the data. The line start with a '#' symbol followed by the output number in the n-best list and the score of the sequence of labels. Also output a score for each label of the sequence. Beware that, if you use viterbi labelling, this is a raw score not really meaningful, it is not normalized so it cannot be interpreted as a probability. To get normalized scores, you must use posterior decoding.
+.TP
+.B \-p | \-\-post
+Use posterior decoding instead of the classical Viterbi decoding. This generally produce better results at the cost of slower decoding. This also allow to output normalized score for sequences and labels.
+.TP
+.B \-n | \-\-nbest <int>
+Output the N best sequences of labels instead of just the best one. The N sequences of labels are output in order in the output file.
+
+.SS Dump mode
+For the moment, there is no switch specific to this mode.
+
+.SH USAGE
+Wapiti can work in different modes. The mode determines which switches are available (see above) and what the model expects in the input and output files. In train mode, Wapiti expects a training dataset as input and outputs the trained model. In label mode, it expects data to label as input and will output the same data labeled by the model. Finally, in dump mode it expects a model as input and outputs it in a readable form.
+.P
+In train mode Wapiti will load a previous model if one is given, read the train dataset and an eventual devel one, and train the model. Progress information are outputted during all these steps. Training stop when the model is fully optimized, when one of stopping criterion is reached or when the user send a TERM signal. (see below)
+.P
+In label mode, progress is not very informative except if you give already labeled data. In this case, error rates are displayed.
+
+.SH STOPPING CRITERION
+.P
+There is various way for training to stop depending on the command line switch provided.
+.P
+The simpler criterion is the iteration count. By default, algorithm will iterate forever but you can specify a maximum number of iteration with \-\-maxiter.
+
+Finding the exact optimum is generally not needed to get the best model. There is an infinity of points around the optimum who lead to almost exactly the same model and are as good as the best one. The error window criterion check for this by looking at the error rate of the model over the development set and stop training when it is stable enough. To do this, the error rate of the last few iterations is kept and when the difference between extreme values falls bellow a given value, training is stopped. (If no devel set is given, the error rates are computed over the training data, but this is bad practice)
+
+For algorithms which provide the objective function value at each iteration, we also stop them when this value has not changed significantly over the past few iterations. This window size is controlled by the objwin parameter.
+
+Each algorithm can also provide their own stopping system like l-bfgs which stops when numerical precision prevents further progress.
+
+The last criterion is the user itself. By sending a TERM signal to Wapiti you instruct it to stop training as soon as possible, discarding the last computation, in order to finish training and save the model. If you don't care about the model, sending a second TERM signal will make the program violently exit without saving anything. (on most system, a TERM signal can be send with CTRL-C)
+
+.SH REGULARIZATION
+.P
+Wapiti use the elasitc-net penalty of the form
+.TP
+rho_1 * |theta|_1 + rho_2 / 2.0 * ||theta||_2^2
+.P
+This mean that you can choose to use the full elastic-net or more classical L1 or L2 penalty. To fallback to one of these, you just have to set respectively rho1 or rho2 to 0.0.
+
+Some algorithms work only with one or the other component, in this case, the value of the other is simply ignored. See the document of each algorithm for more details.
+
+.SH ALGORITHMS
+.B l-bfgs
+This is the classical quasi-newton optimization algorithm with limited memory. It works by approximating the inverse of the diagonal Hessian using an history of the previous values of the features weights and gradient.
+
+This algorithm requires the gradient to be fully computable at any point so it cannot do L1 regularization. In this case the OWL-QN variant is used instead which can handle the full elastic-net penalty.
+
+It requires to keep 5 + M * 2 vectors the sizes of which are the number of features. Each component of these vectors are double precision floating point values. So, for training a model with F features, you need 8 * F * (5 + M * 2) bytes of memory. If the OWL-QN variant is used, one additional vector is needed to keep the pseudo-gradient.
+
+.B sgd-l1
+This is the stochastic gradient descent for L1-regularized model. It works by computing the gradient only on a single sequence at a time and making a small step in this direction.
+
+The SGD algorithm will find very quickly an acceptable solution for the model, but will take a longer time to find the optimal one, and there is no guarantee it will find it.
+
+The memory requirement are lighter than for quasi-Newton methods as it requires only 3 vectors the size of which are the number of features.
+
+.B bcd
+This is the blockwise coordinate descent with elastic-net penalty. This algorithm is best suited for very large label sets and sparse feature sets. It optimizes the model one observation at a time, going through all observations at each iteration. It usually converges in only a few dozen iterations (rarely more than 30).
+
+This the more memory economical algorithm as it only requires to keep the feature weight vector in memory. In this algorithm, using complexe bigram features come almost for free.
+
+This flexibility has a price: don't use it if your features are not sparse, as it will be very slow in this case.
+
+NOTE: This algorithm is available only for training CRF models.
+
+.B rprop (rprop+ / rprop-)
+This algorithm use the gradient only to find a good search direction, not for choosing the step to make in that direction. It can be verry effective on some dataset.
+
+Compared to quasi-newton methods, rprop reach the neighboorhood of the optimum more quickly but the lack of second order information and the restricted use of the first order one make the fine tunning slower.
+
+Memory requirement are quite light as it require 4 vectors of the size of the feature set.
+
+The rprop- is a variant of rprop+ without backtracking, its performance compared to rprop+ is task dependent and it require one less vector so for very large model it can be better.
+
+.SH MULTI-THREADING
+Wapiti can efficiently use multiple threads to speedup the gradient computation for l-bfgs and rprop algorithms. Using the --nthread parameter, you can specify the number of threads to use.
+
+Beware that if the atomic updates were disabled at compilation time, each threads after the first will cost you an extra vector of the size of the feature set. This imply that for large models, multiple thread can cost you a lot of memory. Atomic updates are supported at least with GCC and CLang compilers. It may also work if your compiler support the same intrinsics atomic operations or if you reimplement the atm_inc function in gradient.c for it.
+
+The multi-threading code can be disabled at compilation time if your platform is not supported. See wapiti.h for more details.
+
+.SH DATAFILES
+Data files are plain text files containing sequence separated by empty lines. Each sequence is a set of non-empty lines where each of these represents one position in the sequence.
+
+Each lines are made of tokens separated either by spaces or by tabulations. All tokens are observations available for training or labeling, except the last one in training mode which is assumed to be the label to predict.
+
+If no patterns are specified, each tokens are interpreted directly as an observation and is combined with label in order to generate features. If patterns are specified, they are used in combination with the tokens to generate the features. The observations must be prefixed by either 'u', 'b' or '*' in order to specify if it is unigram, bigram or both.
+
+.SH PATTERNS
+Pattern files are almost compatible with CRF++ templates. Empty lines as well as all characters appearing after a '#' are discarded. The remaining lines are interpreted as patterns.
+
+The first char must be either 'u', 'b' or '*' (in upper or lower case). This indicates the type of feature: respectively unigram, bigrams and both, must be generated from this pattern.
+
+The remaining of the pattern is used to build an observation string. Each marker of the kind "%x[off,col]" is replaced by the token in the column "col" from the data file at current position plus the offset "off".
+The "off" value can be prefixed with an "@" to make it an absolute position from the start of the sequence if it is positive and from the end if it is negative. An offset of "@1" will refer to the first line of data and "@-1" to the last line.
+
+For example, if your data is
+    a1    b1    c1
+    a2    b2    c2
+    a3    b3    c3
+.br
+The pattern "u:%x[-1,0]/%x[+1,2]" applied at position 2 in the sequence will produce the observation "u:a1/c3".
+
+The sequence is extended in front and back with special tokens like "_X-1" or "_X+2" in order to apply markers with any offset at all position in the sequence.
+
+Wapiti also supports a simple kind of matching, very useful, for example, in natural language processing. This is done using two other commands of the form %m[off,col,"regexp"] and %t[off,col,"regexp"]. Both commands will get data the %same way the %x command using the "col" and "off" values but apply a regular expression to it before substituting it. The %t will replace the data by "true" or "false" depending if the expression match on the data or not. The %m command replace the data by the substring matched by the expression.
+
+The regular expression implemented is just a subset of classical regular expression found in classical unix system but is generally enough for most tasks. The recognized subset is quite simple. First for matching characters:
+     .  -> match any characters
+     \\x -> match a character class (in uppercase, match the complement)
+             \\d : digit       \\a : alpha      \\w : alpha + digit
+             \\l : lowercase   \\u : uppercase  \\p : punctuation
+             \\s : space
+           or escape a character
+     x  -> any other character match itself
+.br
+And the constructs :
+     ^  -> at the beginning of the regexp, anchor it at start of string
+     $  -> at the end of regexp, anchor it at end of string
+     *  -> match any number of repetition of the previous character
+     ?  -> optionally match the previous character
+So, for example, the regexp "^.?.?.?.?" will match a prefix of at most four characters and "^\u\u*$" will match only on data composed solely of uppercase characters.
+
+For the commands, %x, %t, and %m, if the command name is given in uppercase, the case is removed from the string before being added to the observation.
+
+.SH PURE MAXENT MODE
+If you don't make anything special, Wapiti will automatically choose between the maxent codepath and the linear-chain codepath for each sequence. If a sequence have a length of one and no bigram features, it will switch to the maxent codepath.
+
+This imply that, if you want to train a maxent only model, you still have to prefix all your features/patterns with 'u' to indicate a unigram feature, and separate all line in your input file with empty lines to make sure they are all length one.
+
+The pure maxent mode, activated by the \-\-me switch in train and label mode, take care of the two problems. When activated, all lines in input files are used independantly as a single sample, and blank lines are ignored. Additionally, all features are automatically prefixed with 'u' forcing them as unigram features, so you don't have to put the prefix yourself.
+
+Be carefull that you have to specify the pure maxent mode both during training and labelling.
+
+.SH MODEL COMPACTION
+If you specify the \-\-compact switch for training, when the model is optimized all the observations which generate only inactive features are removed from the model. In case of l1-penalty this can dramatically reduce the model size.
+
+First, this is interesting to produce a smaller model so the labeling will require a lot less memory and will be faster.
+
+Second, this can allow you to train bigger models. L-BFGS generally produces better models than SGD but requires a lot more memory for training. To reduce the memory needed during L-BFGS optimization, you can train a very big model with a few SGD-L1 iterations, which will give you a rough model but with a lot of inactive features; this model can be compacted to a smaller model which can be easily trained with L-BFGS.
+
+There is a tricky thing here. Compaction only removes the observation from the model not from the patterns. That is why, if you load the same data again, the compacted observations will be regenerated. To prevent this, loading a model before training prevents the generation of new observation keeping only the compacted model.
+
+But this conflicts with another feature, the incremental model construction, which allows us to load a model and add to it additional patterns in order to first train small models and increase them progressively. So if you specify both a model and a pattern file, the observation construction will be re-enabled and so the compaction will just have the effect of reducing the loading time.
+
+.SH EXAMPLES
+For training a very sparse CRF model on data in file 'train.txt' with patterns in file 'pattern' and using owl-qn algorithm, run the command:
+.RS
+wapiti train -p pattern -1 5 train.txt model
+.RE
+This will generate a model file named 'model'. You can later use this model to tag the data in the file 'test.txt' with the command:
+.RS
+wapiti label -m model test.txt result.txt
+.RE
+The tagged data will be stored in file 'result.txt'
+.SH EXIT STATUS
+wapiti returns a zero exit status if all succeeded. In case of failure non-zero is returned a an error message is printed on stderr.
+.SH AUTHOR
+Thomas Lavergne (thomas.lavergne (at) reveurs.org)
+.SH COPYRIGHT
+Copyright (c) 2009-2010  CNRS

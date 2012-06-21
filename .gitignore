@@ -1,0 +1,10 @@
+# use glob syntax.
+syntax: glob
+
+*.o
+*.so
+*.elc
+*.pyc
+*~
+
+wapiti/wapiti
