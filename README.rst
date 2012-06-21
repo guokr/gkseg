@@ -32,8 +32,8 @@ The basic idea is to mark each character in a sentence with its kind:
 
 And then using the marked corpus to train the segmentation program.
 
-At conceptual level, we can treat its ability for segmenting words from the
-inner pattern of Chinese language.
+At conceptual level, we can treat its ability for segmenting from the inner
+pattern of Chinese language.
 
 Interestingly, when we use the tool to segment classic Chinese text, it achieved
 a good performance. That is to say, the inner pattern of Chinese language is not
@@ -88,8 +88,19 @@ gksegt: trainning the tool
 - gksegt add <basedir> <aspect> <trainfile>
 - gksegt train <trainfile> <modelfile>
 
-Use the API
--------------
+Using the API
+---------------
+
+Before using the API, you should intialize the program first, and then perform
+the segmentation, and finally destroy the program.
+
+  import gkseg
+  text = '话说天下大势，分久必合，合久必分'.decode('utf-8')
+  gkseg.init()
+  print gkseg.seg(text) #segment the sentence into a list of words
+  print gkseg.term(text) #extract the important words from the sentence
+  gkseg.destory()
+
 
 The format for training corpus
 --------------------------------
