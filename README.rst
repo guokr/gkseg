@@ -104,6 +104,8 @@ the segmentation, and finally destroy the program.
 
   print gkseg.term(text) #extract the important words from the sentence
 
+  print gkseg.label(text) #label the sentence
+
   gkseg.destory()
 
 The training process
