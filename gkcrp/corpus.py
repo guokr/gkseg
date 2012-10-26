@@ -75,7 +75,7 @@ class Text:
         self.title = ''
         l = len(lines)
         if l == 1:
-            self.cotent = lines[0].strip()
+            self.content = lines[0].strip()
         elif l == 2:
             self.content = '\n'.join((lines[0].strip(), lines[1].strip()))
         else:
