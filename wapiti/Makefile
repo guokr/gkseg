@@ -29,7 +29,8 @@ wapiti: $(SRC) $(HDR)
 	@$(CC) -DNDEBUG  -c -o vmath.o src/vmath.c       $(CFLAGS) $(LIBS) 
 	@$(CC) -DNDEBUG  -c -o label.o src/label.c       $(CFLAGS) $(LIBS) 
 	@$(CC) -DNDEBUG  -c -o wapiti.o src/wapiti.c     $(CFLAGS) $(LIBS) 
-	@$(CC) -shared -Wl -o libwapiti.so bcd.o lbfgs.o pattern.o reader.o thread.o wapiti.o decoder.o model.o progress.o rprop.o tools.o gradient.o  options.o quark.o sgdl1.o vmath.o label.o -lc
+	@$(CC) -shared -o libwapiti.so bcd.o lbfgs.o pattern.o reader.o thread.o wapiti.o decoder.o model.o progress.o rprop.o 
+tools.o gradient.o  options.o quark.o sgdl1.o vmath.o label.o -lc
 	@echo "CC: wapiti.c --> wapiti"
 	@$(CC) -DNDEBUG $(CFLAGS) -o wapiti $(SRC) $(LIBS)
 
