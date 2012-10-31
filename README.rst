@@ -133,7 +133,21 @@ Here we have
 The format of training corpus
 -------------------------------
 
+In logic, a corpus is a set of files organized in several aspect. And in
+physics, a training corpus must be organized into the following way:
 
+- A top folder with an index.txt file, in the index file it gives all the
+aspects and filename list in the corpus.
+- An aspect is a subfolder contains all the files.
+
+You can check the example at https://github.com/guokr/corpus/tree/master/zhxs
+
+The python module - gkcrp - in this package can be used to deal with this corpus
+format.
+
+Just as showed in the demo at https://github.com/guokr/corpus/tree/master/zhxs ,
+we have two aspect - original and labeled. in labeled folder, we give all the
+articles labeled by the mark "\m" to hightlight the important keywords.
 
 Contributors
 --------------
