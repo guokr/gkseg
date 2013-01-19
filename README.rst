@@ -136,8 +136,7 @@ The format of training corpus
 In logic, a corpus is a set of files organized in several aspect. And in
 physics, a training corpus must be organized into the following way:
 
-- A top folder with an index.txt file, in the index file it gives all the
-aspects and filename list in the corpus.
+- A top folder with an index.txt file, in the index file it gives all the aspects and filename list in the corpus.
 - An aspect is a subfolder contains all the files.
 
 You can check the example at https://github.com/guokr/corpus/tree/master/zhxs
